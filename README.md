@@ -9,6 +9,7 @@ https://www.kancloud.cn/thinkcmf/theme_tutorial
 ### Git仓库
 
 1. GitHub:https://github.com/thinkcmf/portal 主要仓库
+2. 码云:https://gitee.com/thinkcmf/portal 国内仓库
 
 ### 环境推荐
 > php7.1
