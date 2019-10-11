@@ -3,7 +3,7 @@ ThinkCMF企业门户解决方案
 帮助你更快地搭建企业门户网站
 
 ### 开发手册
-http://www.kancloud.cn/thinkcmf/doc5_1
+http://www.kancloud.cn/thinkcmf/doc5_1  
 https://www.kancloud.cn/thinkcmf/theme_tutorial
 
 ### Git仓库
