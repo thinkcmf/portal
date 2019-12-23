@@ -5,6 +5,7 @@
     <meta name="keywords" content=""/>
     <meta name="description" content="">
     <include file="public@head"/>
+    <link type="text/css" rel="stylesheet" href="__TMPL__/public/assets/simpleboot3/cropper/cropper.css" />
     <style type="text/css">
         .tab-content {
             overflow: visible;
@@ -20,6 +21,75 @@
 
         .uploaded_avatar_area .uploaded_avatar_btns {
             display: none;
+        }
+
+        /* avatarCropper */
+        .avatarwrap, .avatar-Tools {
+            width: 475px;
+            height: 310px;
+            margin: 20px 0 0 0;
+        }
+
+        .avatarwrap .avatar-cropper {
+            float: left;
+            width: 300px;
+            height: 300px;
+            border: 1px solid #3e4664;
+            display: block;
+            overflow: hidden;
+        }
+
+        .avatar-cropper img {
+            max-width: 100%;
+        }
+
+        .avatarwrap .avatar-preview {
+            float: left;
+            width: 150px;
+            margin: 0 0 0 22px;
+        }
+
+        .avatar-preview .UserPreview {
+            width: 100%;
+            margin: 0;
+        }
+
+        .UserPreview .img-preview {
+            width: 150px;
+            height: 150px;
+            border: 1px solid #3e4664;
+            margin: 0 0 20px 0;
+            padding: 0;
+            display: block;
+            overflow: hidden;
+        }
+
+        .UserPreview .preview-md {
+            width: 80px;
+            height: 80px;
+        }
+
+        .UserPreview .preview-sm {
+            width: 30px;
+            height: 30px;
+            margin: 0;
+        }
+
+        .avatar-Tools {
+            margin: 0;
+            height: auto;
+        }
+
+        .avatar-Tools .btn-group {
+            margin: 0 0 5px 0;
+        }
+
+        .avatar-Tools .btnsave {
+            margin: 1px 0 0 0;
+        }
+
+        .avatar-Tools>.btn-group>.btn {
+            width: 75.5px;
         }
     </style>
 </head>
@@ -38,21 +108,34 @@
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane active" id="one">
-                        <br>
-                        <if condition="empty($avatar)">
-                            <img src="__TMPL__/public/assets/images/headicon_128.png" class="headicon" width="128"/>
-                            <else/>
-                            <img src="{:cmf_get_user_avatar_url($avatar)}?t={:time()}" class="headicon" width="128"/>
-                        </if>
-                        <br><br>
-                        <input type="file" onchange="avatar_upload(this)" id="avatar_uploder" name="file"/>
-                        <div class="uploaded_avatar_area">
-                            <div class="uploaded_avatar_btns">
-                                <a class="btn btn-primary confirm_avatar_btn" onclick="update_avatar()">确定</a>
-                                <a class="btn" onclick="reloadPage()">取消</a>
+                        <div class="avatarwrap">
+                            <div id="jqueryCropper" class="avatar-cropper">
+                                <img id="userAvatarImage" src="{:cmf_get_user_avatar_url($avatar)}">
+                            </div>
+                            <div class="avatar-preview">
+                                <div class="UserPreview">
+                                    <div class="img-preview preview-lg"></div>
+                                    <div class="img-preview preview-md"></div>
+                                    <div class="img-preview preview-sm"></div>
+                                </div>
                             </div>
                         </div>
-                        <p class="help-block">头像支持jpg,png,jpeg格式,文件大小最大不能超过1M</p>
+                        <div class="avatar-Tools">
+                            <div class="btn-group">
+                                <button type="button" class="btn eventBtn" role="group" data-method="setDragMode" data-option="move" title="移动图片"><span class="fa fa-arrows"></span> 移动</button>
+                                <button type="button" class="btn eventBtn" role="group" data-method="setDragMode" data-option="crop" title="裁剪图片"><span class="fa fa-crop"></span> 裁剪</button>
+                                <button type="button" class="btn eventBtn" role="group" data-method="rotate" data-option="-10" title="向左旋转图片"><span class="fa fa-rotate-left"></span> 左旋</button>
+                                <button type="button" class="btn eventBtn" role="group" data-method="rotate" data-option="10" title="向又旋转图片"><span class="fa fa-rotate-right"></span> 右旋</button>
+                            </div>
+                            <div class="btn-group">
+                                <label class="btn btn-primary eventBtn" for="inputImage" title="打开图片">
+                                    <input type="file" class="sr-only" id="inputImage" name="file" accept=".jpg,.jpeg,.png">
+                                    <span class="fa fa-upload"></span> 上传
+                                </label>
+                                <button type="button" class="btn btn-primary eventBtn" role="group" data-method="reset" title="重置图片"><span class="fa fa-refresh"></span> 重置</button>
+                            </div>
+                            <button id="saveavatar" type="button" class="btn btn-success btn-lg btn-block btnsave eventBtn"><i class="fa fa-save"></i> 确认保存</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -65,83 +148,123 @@
 <!-- /container -->
 
 <include file="public@scripts"/>
+<script src="__TMPL__/public/assets/simpleboot3/cropper/cropper.js"></script>
+<script src="__TMPL__/public/assets/simpleboot3/cropper/jquery-cropper.min.js"></script>
+<script src="__TMPL__/public/assets/simpleboot3/canvas-to-blob/canvas-to-blob.min.js"></script>
 <script type="text/javascript">
-    function update_avatar() {
-        var area = $(".uploaded_avatar_area img").data("area");
-        $.post("{:url('Profile/avatarUpdate')}", area, function (data) {
-            if (data.code == 1) {
-                reloadPage(window);
+    
+    // 初始化变量
+    <php>$uploadedImageName = empty($avatar) ? '' : 'temp_image.jpg';</php>
+    var nzc = $("#jqueryCropper");
+    var nzi = $('#userAvatarImage');
+    var n2i = $('#inputImage');
+    var originalImageURL = n2i.attr('src');
+    var uploadedImageName = '{$uploadedImageName}';
+    var uploadedImageType = 'image/jpeg';
+    var uploadedImageURL = '';
+    var uploadedParams = {};
+    var options = {
+        aspectRatio: 1 / 1,
+        preview: '.img-preview',
+        viewMode: 2
+    };
+
+    // ready事件
+    $(function(){
+
+        // 监听工具栏按钮
+        $('button[data-method]').on('click',function(){
+            nzi.cropper($(this).data('method'), $(this).data('option'))
+        })
+
+        // 监听上传控件内容变更
+        n2i.change(function () {
+            
+            var files = this.files;
+            var file;
+            
+            if (!nzi.data('cropper')) {
+                return;
             }
-
-        }, "json");
-
-    }
-    function avatar_upload(obj) {
-        var $fileinput = $(obj);
-        /* $(obj)
-         .show()
-         .ajaxComplete(function(){
-         $(this).hide();
-         }); */
-        Wind.css("jcrop");
-        Wind.use("ajaxfileupload", "jcrop", "noty", function () {
-            $.ajaxFileUpload({
-                url: "{:url('Profile/avatarUpload')}",
-                secureuri: false,
-                fileElementId: "avatar_uploder",
-                dataType: 'json',
-                data: {},
-                success: function (data, status) {
-
-                    if (data.code == 1) {
-                        $("#avatar_uploder").hide();
-                        var $uploaded_area = $(".uploaded_avatar_area");
-                        $uploaded_area.find("img").remove();
-                        var src  = "__ROOT__/upload/" + data.data.file;
-                        var $img = $("<img/>").attr("src", src);
-                        $img.prependTo($uploaded_area);
-                        $(".uploaded_avatar_btns").show();
-                        var img = new Image();
-                        img.src = src;
-
-                        var callback = function () {
-                            $img.Jcrop({
-                                aspectRatio: 1,
-                                trueSize: [img.width, img.height],
-                                setSelect: [0, 0, 100, 100],
-                                onSelect: function (c) {
-                                    $img.data("area", c);
-                                }
-                            });
-                        }
-
-                        if (img.complete) {
-                            callback();
-                        } else {
-                            img.onload = callback;
-                        }
-
-                    } else {
-                        noty({
-                            text: data.msg,
-                            type: 'error',
-                            layout: 'center',
-                            callback: {
-                                afterClose: function () {
-                                    reloadPage(window);
-                                }
-                            }
-                        });
+            
+            if (files && files.length) {
+                
+                file = files[0];
+                
+                if (/^image\/\w+$/.test(file.type)) {
+                    
+                    uploadedImageName = file.name;
+                    uploadedImageType = file.type;
+                    
+                    if (uploadedImageURL) {
+                        URL.revokeObjectURL(uploadedImageURL);
                     }
-
-                },
-                error: function (data, status, e) {
+                    
+                    uploadedImageURL = URL.createObjectURL(file);
+                    
+                    nzi.cropper('destroy').attr('src', uploadedImageURL).cropper(options);
+                    n2i.val('');
+                } else {
+                    window.alert('Please choose an image file.');
                 }
-            });
-        });
+            }
+        })
 
-        return false;
-    }
+        // 监听保存
+        $('#saveavatar').on('click',function (){
+
+            // 禁用所有控件
+            $('.eventBtn').prop('disabled', true);
+            $('.btnsave').html('<i class="fa fa-spinner fa-pulse fa-fw"></i> 上传中');
+
+            // 判断是否有数据
+            let tmp_img = nzi.cropper('getCroppedCanvas',{width: 512,height: 512})
+            if(!tmp_img) alert('请上传图片。');
+            
+            // 转blob上传
+            tmp_img.toBlob(function (blob){
+
+                // 创建form
+                var formData = new FormData();
+                formData.append('file', blob, uploadedImageName);
+
+                // 禁用cropper
+                nzi.cropper('disable')
+
+                // ajax 上传
+                Wind.use("noty", function () {
+                    $.ajax("{:cmf_url('user/Profile/avatarUpload')}", {
+                        method: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (e) {
+                            delay_url = e.url
+                            noty({text: e.msg,type: ((e.code == 0) ? 'error' : 'success'),layout: 'center'})
+                            $('.eventBtn').prop('disabled', false);
+                            $('.btnsave').html('<i class="fa fa-save"></i> 确认保存');
+                            nzi.cropper('enable')
+                            if(e.url != '') {
+                                setTimeout(function(){ window.location.href = e.url }, (e.wait-1)*1000)
+                            }
+                            console.log(e)
+                        },
+                        error: function (e) {
+                            noty({text: '网络连接失败。',type: 'error',layout: 'center'})
+                            $('.eventBtn').prop('disabled', false);
+                            $('.btnsave').html('<i class="fa fa-save"></i> 确认保存');
+                            nzi.cropper('enable')
+                        }
+                    })
+                })
+
+            }, "image/jpeg", 0.85);
+
+        });
+        
+        // 初始化裁剪窗口
+        nzi.cropper(options);
+    })
 </script>
 </body>
 </html>
