@@ -23,6 +23,7 @@ class CategoriesController extends RestBaseController
      */
     public function index()
     {
+
         $params          = $this->request->get();
         $categoryService = new PortalCategoryService();
         $data            = $categoryService->categories($params);
