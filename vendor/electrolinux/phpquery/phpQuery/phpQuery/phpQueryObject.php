@@ -1037,7 +1037,7 @@ class phpQueryObject
 				if (! $param)
 					break;
 					// nth-child(n+b) to nth-child(1n+b)
-				if ($param{0} == 'n')
+				if ($param[0] == 'n')
 					$param = '1'.$param;
 				// :nth-child(index/even/odd/equation)
 				if ($param == 'even' || $param == 'odd')
@@ -1052,7 +1052,7 @@ class phpQueryObject
 								return null;'),
 						new CallbackParam(), $param
 					);
-				else if (mb_strlen($param) > 1 && $param{1} == 'n')
+				else if (mb_strlen($param) > 1 && $param[1] == 'n')
 					// an+b
 					$mapped = $this->map(
 						create_function('$node, $param',
@@ -1878,7 +1878,7 @@ class phpQueryObject
 	}
 	/**
 	 * Enter description here...
-	 * 
+	 *
 	 * @param $code
 	 * @return unknown_type
 	 */
@@ -1889,7 +1889,7 @@ class phpQueryObject
 	}
 	/**
 	 * Enter description here...
-	 * 
+	 *
 	 * @param $code
 	 * @return unknown_type
 	 */
@@ -2264,7 +2264,7 @@ class phpQueryObject
 		}
 		return $return;
 	}
-	
+
 	/**
 	 * @return The text content of each matching element, like
 	 * text() but returns an array with one entry per matched element.
@@ -2277,7 +2277,7 @@ class phpQueryObject
 		}
 		return $results;
 	}
-	
+
 	/**
 	 * Enter description here...
 	 *
@@ -2645,7 +2645,7 @@ class phpQueryObject
 		return is_null($value)
 			? '' : $this;
 	}
-	
+
 	/**
 	 * @return The same attribute of each matching element, like
 	 * attr() but returns an array with one entry per matched element.
@@ -2949,7 +2949,7 @@ class phpQueryObject
 	}
 	/**
 	 * Enter description here...
-	 * 
+	 *
 	 * @param <type> $key
 	 * @param <type> $value
 	 */
@@ -2966,7 +2966,7 @@ class phpQueryObject
 	}
 	/**
 	 * Enter description here...
-	 * 
+	 *
 	 * @param <type> $key
 	 */
 	public function removeData($key) {
