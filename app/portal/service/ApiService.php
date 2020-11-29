@@ -12,8 +12,8 @@ namespace app\portal\service;
 
 use app\portal\model\PortalPostModel;
 use app\portal\model\PortalCategoryModel;
-use think\Db;
 use think\db\Query;
+use app\portal\model\PortalTagModel;
 
 class ApiService
 {
@@ -58,6 +58,11 @@ class ApiService
             'post.delete_time' => 0
         ];
 
+        $wherePublishedTime = function (Query $query) {
+            $query->where('post.published_time', '>', 0)
+                ->where('post.published_time', '<', time());
+        };
+
         $paramWhere = empty($param['where']) ? '' : $param['where'];
 
         $limit       = empty($param['limit']) ? 10 : $param['limit'];
@@ -66,16 +71,11 @@ class ApiService
         $relation    = empty($param['relation']) ? '' : $param['relation'];
         $categoryIds = empty($param['category_ids']) ? '' : $param['category_ids'];
 
-        $join = [
-            //['__USER__ user', 'post.user_id = user.id'],
-        ];
-
         $whereCategoryId = null;
 
         if (!empty($categoryIds)) {
 
             $field = !empty($param['field']) ? $param['field'] : 'post.*,min(category_post.category_id) as category_id';
-            array_push($join, ['__PORTAL_CATEGORY_POST__ category_post', 'post.id = category_post.post_id']);
 
             if (!is_array($categoryIds)) {
                 $categoryIds = explode(',', $categoryIds);
@@ -93,15 +93,15 @@ class ApiService
         } else {
 
             $field = !empty($param['field']) ? $param['field'] : 'post.*,min(category_post.category_id) as category_id';
-            array_push($join, ['__PORTAL_CATEGORY_POST__ category_post', 'post.id = category_post.post_id']);
+
         }
 
         $articles = $portalPostModel->alias('post')->field($field)
-            ->join($join)
+            ->join('portal_category_post category_post', 'post.id = category_post.post_id')
             ->where($where)
             ->where($paramWhere)
             ->where($whereCategoryId)
-            ->where('post.published_time', ['> time', 0], ['<', time()], 'and')
+            ->where($wherePublishedTime)
             ->order($order)
             ->group('post.id');
 
@@ -362,8 +362,8 @@ class ApiService
             'parent_id'   => $categoryId
         ];
 
-		return $portalCategoryModel->field($field)->where($where)->order('list_order ASC')->select();
-	}
+        return $portalCategoryModel->field($field)->where($where)->order('list_order ASC')->select();
+    }
 
     /**
      * 返回指定分类下的所有子分类
@@ -454,6 +454,26 @@ class ApiService
         }
 
         return $data;
+    }
+
+    /**
+     * 返回指定文章的标签
+     * @param int $id 文章ID
+     * @return array 返回符合条件的所有标签
+     */
+    public static function tags($id)
+    {
+        $portalTagModel = new PortalTagModel();
+
+        $where = [
+            'tags.status' => 1,
+            'tag_post.post_id' => $id
+        ];
+
+        return $portalTagModel->alias('tags')
+            ->where($where)
+            ->join('portal_tag_post tag_post', 'tags.id = tag_post.tag_id')
+            ->select();
     }
 
 }

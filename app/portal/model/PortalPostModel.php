@@ -12,13 +12,17 @@ namespace app\portal\model;
 
 use app\admin\model\RouteModel;
 use think\Model;
-use think\Db;
 
 /**
  * @property mixed id
  */
 class PortalPostModel extends Model
 {
+    /**
+     * 模型名称
+     * @var string
+     */
+    protected $name = 'portal_post';
 
     protected $type = [
         'more' => 'array',
@@ -112,7 +116,7 @@ class PortalPostModel extends Model
             $data['more']['video'] = cmf_asset_relative_url($data['more']['video']);
         }
 
-        $this->allowField(true)->data($data, true)->isUpdate(false)->save();
+        $this->save($data);
 
         if (is_string($categories)) {
             $categories = explode(',', $categories);
@@ -155,23 +159,27 @@ class PortalPostModel extends Model
             $data['more']['video'] = cmf_asset_relative_url($data['more']['video']);
         }
 
-        $this->allowField(true)->isUpdate(true)->data($data, true)->save();
+        unset($data['categories']);
+
+        $article = self::find($data['id']);
+
+        $article->save($data);
 
         if (is_string($categories)) {
             $categories = explode(',', $categories);
         }
 
-        $oldCategoryIds        = $this->categories()->column('category_id');
+        $oldCategoryIds        = $article->categories()->column('category_id');
         $sameCategoryIds       = array_intersect($categories, $oldCategoryIds);
         $needDeleteCategoryIds = array_diff($oldCategoryIds, $sameCategoryIds);
         $newCategoryIds        = array_diff($categories, $sameCategoryIds);
 
         if (!empty($needDeleteCategoryIds)) {
-            $this->categories()->detach($needDeleteCategoryIds);
+            $article->categories()->detach($needDeleteCategoryIds);
         }
 
         if (!empty($newCategoryIds)) {
-            $this->categories()->attach(array_values($newCategoryIds));
+            $article->categories()->attach(array_values($newCategoryIds));
         }
 
 
@@ -205,7 +213,7 @@ class PortalPostModel extends Model
 
         if (!empty($keywords)) {
 
-            $oldTagIds = Db::name('portal_tag_post')->where('post_id', $articleId)->column('tag_id');
+            $oldTagIds = PortalTagPostModel::where('post_id', $articleId)->column('tag_id');
 
             foreach ($keywords as $keyword) {
                 $keyword = trim($keyword);
@@ -230,7 +238,7 @@ class PortalPostModel extends Model
 
 
             if (empty($tagIds) && !empty($oldTagIds)) {
-                Db::name('portal_tag_post')->where('post_id', $articleId)->delete();
+                PortalTagPostModel::where('post_id', $articleId)->delete();
             }
 
             $sameTagIds = array_intersect($oldTagIds, $tagIds);
@@ -238,19 +246,18 @@ class PortalPostModel extends Model
             $shouldDeleteTagIds = array_diff($oldTagIds, $sameTagIds);
 
             if (!empty($shouldDeleteTagIds)) {
-                Db::name('portal_tag_post')
-                    ->where('post_id', $articleId)
+                PortalTagPostModel::where('post_id', $articleId)
                     ->where('tag_id', 'in', $shouldDeleteTagIds)
                     ->delete();
             }
 
             if (!empty($data)) {
-                Db::name('portal_tag_post')->insertAll($data);
+                PortalTagPostModel::insertAll($data);
             }
 
 
         } else {
-            Db::name('portal_tag_post')->where('post_id', $articleId)->delete();
+            PortalTagPostModel::where('post_id', $articleId)->delete();
         }
     }
 
@@ -280,21 +287,21 @@ class PortalPostModel extends Model
 
                 ];
 
-                Db::startTrans(); //开启事务
+                PortalPostModel::startTrans(); //开启事务
                 $transStatus = false;
                 try {
-                    Db::name('portal_post')->where('id', $id)->update([
+                    PortalPostModel::where('id', $id)->update([
                         'delete_time' => time()
                     ]);
-                    Db::name('recycle_bin')->insert($recycleData);
+                    RecycleBinModel::insert($recycleData);
 
                     $transStatus = true;
                     // 提交事务
-                    Db::commit();
+                    PortalPostModel::commit();
                 } catch (\Exception $e) {
 
                     // 回滚事务
-                    Db::rollback();
+                    PortalPostModel::rollback();
                 }
                 return $transStatus;
 
@@ -318,25 +325,25 @@ class PortalPostModel extends Model
 
                 }
 
-                Db::startTrans(); //开启事务
+                PortalPostModel::startTrans(); //开启事务
                 $transStatus = false;
                 try {
-                    Db::name('portal_post')->where('id', 'in', $ids)
+                    PortalPostModel::where('id', 'in', $ids)
                         ->update([
                             'delete_time' => time()
                         ]);
 
 
-                    Db::name('recycle_bin')->insertAll($recycleData);
+                    RecycleBinModel::insertAll($recycleData);
 
                     $transStatus = true;
                     // 提交事务
-                    Db::commit();
+                    PortalPostModel::commit();
 
                 } catch (\Exception $e) {
 
                     // 回滚事务
-                    Db::rollback();
+                    PortalPostModel::rollback();
 
 
                 }
@@ -367,7 +374,7 @@ class PortalPostModel extends Model
 
         $data['post_status'] = empty($data['post_status']) ? 0 : 1;
         $data['post_type']   = 2;
-        $this->allowField(true)->data($data, true)->save();
+        $this->save($data);
 
         return $this;
 
@@ -388,10 +395,13 @@ class PortalPostModel extends Model
 
         $data['post_status'] = empty($data['post_status']) ? 0 : 1;
         $data['post_type']   = 2;
-        $this->allowField(true)->isUpdate(true)->data($data, true)->save();
+
+        $thisPage = PortalPostModel::find($data['id']);
+        $thisPage->save($data);
 
         $routeModel = new RouteModel();
-        $routeModel->setRoute($data['post_alias'], 'portal/Page/index', ['id' => $data['id']], 2, 5000);
+        $routeUrl   = $data['post_alias'] ? trim($data['post_alias'], '$') . '$' : '';
+        $routeModel->setRoute($routeUrl, 'portal/Page/index', ['id' => $data['id']], 2, 5000);
 
         $routeModel->getRoutes(true);
         return $this;

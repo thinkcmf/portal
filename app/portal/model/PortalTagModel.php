@@ -14,6 +14,12 @@ use think\Model;
 
 class PortalTagModel extends Model
 {
+    /**
+     * 模型名称
+     * @var string
+     */
+    protected $name = 'portal_tag';
+
     public static   $STATUS = array(
         0=>"未启用",
         1=>"已启用",

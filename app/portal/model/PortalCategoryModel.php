@@ -11,16 +11,27 @@
 namespace app\portal\model;
 
 use app\admin\model\RouteModel;
-use think\db\Query;
 use think\Model;
 use tree\Tree;
+use think\db\Query;
 
 class PortalCategoryModel extends Model
 {
+    /**
+     * 模型名称
+     * @var string
+     */
+    protected $name = 'portal_category';
 
     protected $type = [
         'more' => 'array',
     ];
+
+    public function getArticleTotalCountAttr($value, $data)
+    {
+        $total = PortalCategoryPostModel::where('category_id', $data['id'])->where('status', 1)->count();
+        return $total;
+    }
 
     /**
      * 生成分类 select树形结构
@@ -37,7 +48,7 @@ class PortalCategoryModel extends Model
             ->where('delete_time', 0)
             ->where(function (Query $query) use ($currentCid) {
                 if (!empty($currentCid)) {
-                    $query->where('id', 'neq', $currentCid);
+                    $query->where('id', '<>', $currentCid);
                 }
             })
             ->select()->toArray();
@@ -97,6 +108,9 @@ class PortalCategoryModel extends Model
             } else {
                 $item['str_action'] .= '<a class="btn btn-xs btn-success js-ajax-dialog-btn" data-msg="您确定显示此分类吗" href="' . url('AdminCategory/toggle', ['ids' => $item['id'], 'display' => 1]) . '">显示</a>';
             }
+            if ($item['description']) {
+                $item['description'] = '<span title=' . $item['description'] . '>' . mb_substr($item['description'], 0, 50) . "…</span>";
+            }
             array_push($newCategories, $item);
         }
 
@@ -131,7 +145,7 @@ class PortalCategoryModel extends Model
             if (!empty($data['more']['thumbnail'])) {
                 $data['more']['thumbnail'] = cmf_asset_relative_url($data['more']['thumbnail']);
             }
-            $this->allowField(true)->save($data);
+            $this->save($data);
             $id = $this->id;
             if (empty($data['parent_id'])) {
 
@@ -187,7 +201,7 @@ class PortalCategoryModel extends Model
             if (!empty($data['more']['thumbnail'])) {
                 $data['more']['thumbnail'] = cmf_asset_relative_url($data['more']['thumbnail']);
             }
-            $this->isUpdate(true)->allowField(true)->save($data, ['id' => $id]);
+            $this->where('id', $id)->update($data);
 
             $children = $this->field('id,path')->where('path', 'like', $oldCategory['path'] . "-%")->select();
             if (!$children->isEmpty()) {

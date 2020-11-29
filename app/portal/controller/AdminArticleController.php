@@ -10,11 +10,13 @@
 // +----------------------------------------------------------------------
 namespace app\portal\controller;
 
+use app\portal\model\PortalCategoryPostModel;
+use app\portal\model\PortalTagPostModel;
+use app\portal\model\RecycleBinModel;
 use cmf\controller\AdminBaseController;
 use app\portal\model\PortalPostModel;
 use app\portal\service\PostService;
 use app\portal\model\PortalCategoryModel;
-use think\Db;
 use app\admin\model\ThemeModel;
 
 class AdminArticleController extends AdminBaseController
@@ -304,10 +306,10 @@ class AdminArticleController extends AdminBaseController
                 ->where('id', $id)
                 ->update(['delete_time' => time()]);
             if ($resultPortal) {
-                Db::name('portal_category_post')->where('post_id', $id)->update(['status' => 0]);
-                Db::name('portal_tag_post')->where('post_id', $id)->update(['status' => 0]);
+                PortalCategoryPostModel::where('post_id', $id)->update(['status' => 0]);
+                PortalTagPostModel::where('post_id', $id)->update(['status' => 0]);
 
-                Db::name('recycleBin')->insert($data);
+                RecycleBinModel::insert($data);
             }
             $this->success("删除成功！", '');
 
@@ -318,8 +320,8 @@ class AdminArticleController extends AdminBaseController
             $recycle = $portalPostModel->where('id', 'in', $ids)->select();
             $result  = $portalPostModel->where('id', 'in', $ids)->update(['delete_time' => time()]);
             if ($result) {
-                Db::name('portal_category_post')->where('post_id', 'in', $ids)->update(['status' => 0]);
-                Db::name('portal_tag_post')->where('post_id', 'in', $ids)->update(['status' => 0]);
+                PortalCategoryPostModel::where('post_id', 'in', $ids)->update(['status' => 0]);
+                PortalTagPostModel::where('post_id', 'in', $ids)->update(['status' => 0]);
                 foreach ($recycle as $value) {
                     $data = [
                         'object_id'   => $value['id'],
@@ -328,7 +330,7 @@ class AdminArticleController extends AdminBaseController
                         'name'        => $value['post_title'],
                         'user_id'     => cmf_get_current_admin_id()
                     ];
-                    Db::name('recycleBin')->insert($data);
+                    RecycleBinModel::insert($data);
                 }
                 $this->success("删除成功！", '');
             }
@@ -454,7 +456,7 @@ class AdminArticleController extends AdminBaseController
      */
     public function listOrder()
     {
-        parent::listOrders(Db::name('portal_category_post'));
+        parent::listOrders('portal_category_post');
         $this->success("排序更新成功！", '');
     }
 }

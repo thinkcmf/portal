@@ -11,8 +11,8 @@
 namespace app\portal\controller;
 
 use app\portal\model\PortalTagModel;
+use app\portal\model\PortalTagPostModel;
 use cmf\controller\AdminBaseController;
-use think\Db;
 
 /**
  * Class AdminTagController 标签管理控制器
@@ -144,10 +144,9 @@ class AdminTagController extends AdminBaseController
         if (empty($intId)) {
             $this->error(lang("NO_ID"));
         }
-        $portalTagModel = new PortalTagModel();
 
-        $portalTagModel->where('id' , $intId)->delete();
-        Db::name('portal_tag_post')->where('tag_id', $intId)->delete();
+        PortalTagModel::where('id', $intId)->delete();
+        PortalTagPostModel::where('tag_id', $intId)->delete();
         $this->success(lang("DELETE_SUCCESS"));
     }
 }

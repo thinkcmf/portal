@@ -6,24 +6,18 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: 老猫 <thinkcmf@126.com>
+// | Author:kane < chengjin005@163.com>
 // +----------------------------------------------------------------------
 namespace app\portal\model;
 
 use think\Model;
 
-class UserModel extends Model
+class RecycleBinModel extends Model
 {
-
     /**
      * 模型名称
      * @var string
      */
-    protected $name = 'user';
-
-    protected $type = [
-        'more' => 'array',
-    ];
-
+    protected $name = 'recycle_bin';
 
 }
