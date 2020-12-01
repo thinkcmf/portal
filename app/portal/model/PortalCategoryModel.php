@@ -197,11 +197,14 @@ class PortalCategoryModel extends Model
             $result = false;
         } else {
 
+            $categoryAlias = $data['alias'];
+            unset($data['alias']);
             $data['path'] = $newPath;
             if (!empty($data['more']['thumbnail'])) {
                 $data['more']['thumbnail'] = cmf_asset_relative_url($data['more']['thumbnail']);
             }
-            $this->where('id', $id)->update($data);
+            $category = $this->where('id', $id)->find();
+            $category->save($data);
 
             $children = $this->field('id,path')->where('path', 'like', $oldCategory['path'] . "-%")->select();
             if (!$children->isEmpty()) {
@@ -212,9 +215,9 @@ class PortalCategoryModel extends Model
             }
 
             $routeModel = new RouteModel();
-            if (!empty($data['alias'])) {
-                $routeModel->setRoute($data['alias'], 'portal/List/index', ['id' => $data['id']], 2, 5000);
-                $routeModel->setRoute($data['alias'] . '/:id', 'portal/Article/index', ['cid' => $data['id']], 2, 4999);
+            if (!empty($categoryAlias)) {
+                $routeModel->setRoute($categoryAlias, 'portal/List/index', ['id' => $data['id']], 2, 5000);
+                $routeModel->setRoute($categoryAlias . '/:id', 'portal/Article/index', ['cid' => $data['id']], 2, 4999);
             } else {
                 $routeModel->deleteRoute('portal/List/index', ['id' => $data['id']]);
                 $routeModel->deleteRoute('portal/Article/index', ['cid' => $data['id']]);
