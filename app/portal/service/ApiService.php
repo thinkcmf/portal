@@ -207,11 +207,17 @@ class ApiService
             $where['tag_post.tag_id'] = $tagId;
         }
 
+        $wherePublishedTime = function (Query $query) {
+            $query->where('post.published_time', '>', 0)
+                ->where('post.published_time', '<', time());
+        };
+
+
         $articles = $portalPostModel->alias('post')->field($field)
             ->join($join)
             ->where($where)
             ->where($paramWhere)
-            ->where('post.published_time', ['> time', 0], ['<', time()], 'and')
+            ->where($wherePublishedTime)
             ->order($order);
 
         $return = [];
@@ -268,8 +274,13 @@ class ApiService
             'delete_time' => 0
         ];
 
+        $wherePublishedTime = function (Query $query) {
+            $query->where('published_time', '>', 0)
+                ->where('published_time', '<', time());
+        };
+
         return $portalPostModel->where($where)
-            ->where('published_time', ['> time', 0], ['<', time()], 'and')
+            ->where($wherePublishedTime)
             ->find();
     }
 
@@ -296,10 +307,15 @@ class ApiService
             'delete_time' => 0
         ];
 
+        $wherePublishedTime = function (Query $query) {
+            $query->where('published_time', '>', 0)
+                ->where('published_time', '<', time());
+        };
+
         return $portalPostModel
             ->where($where)
             ->where($paramWhere)
-            ->where('published_time', [['> time', 0], ['<', time()]], 'and')
+            ->where($wherePublishedTime)
             ->order($order)
             ->select();
     }
@@ -320,8 +336,13 @@ class ApiService
             'delete_time' => 0
         ];
 
+        $wherePublishedTime = function (Query $query) {
+            $query->where('published_time', '>', 0)
+                ->where('published_time', '<', time());
+        };
+
         return $portalPostModel->where($where)
-            ->where('published_time', ['> time', 0], ['<', time()], 'and')
+            ->where($wherePublishedTime)
             ->find();
     }
 
