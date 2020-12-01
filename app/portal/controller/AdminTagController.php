@@ -118,7 +118,7 @@ class AdminTagController extends AdminBaseController
         }
 
         $portalTagModel = new PortalTagModel();
-        $portalTagModel->isUpdate(true)->save(["status" => $intStatus], ["id" => $intId]);
+        $portalTagModel->where("id", $intId)->update(["status" => $intStatus]);
 
         $this->success(lang("SAVE_SUCCESS"));
 
