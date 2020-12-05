@@ -279,8 +279,8 @@ class PostService
         ];
 
         $wherePublishedTime = function (Query $query) {
-            $query->where('post.published_time', '>', 0)
-                ->where('post.published_time', '<', time());
+            $query->where('published_time', '>', 0)
+                ->where('published_time', '<', time());
         };
 
         $portalPostModel = new PortalPostModel();
