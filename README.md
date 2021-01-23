@@ -1,4 +1,4 @@
-ThinkCMF企业门户解决方案,兼容ThinkCMF6.0
+ThinkCMF企业门户解决方案,同时兼容ThinkCMF5.1和6.0
 ===============
 帮助你更快地搭建企业门户网站
 
@@ -25,6 +25,12 @@ https://www.kancloud.cn/thinkcmf/theme_tutorial
 > mysql 5.5+ (mysql5.1安装时选择utf8编码，不支持表情符)
 
 > 打开rewrite
+
+### 安装步骤
+1. 下载本仓库代码，覆盖到你的ThinkCMF里
+2. 导入`app/portal/data/portal.sql`文件（注意把`cmf_`表前缀替换成自己的）
+3. 在后台模板管理里安装`simpleboot3`模板
+4. 如果想用`simpleboot3`模板，可以启用此模板
 
 
 ### QQ群:
