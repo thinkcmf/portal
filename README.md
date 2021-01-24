@@ -31,7 +31,8 @@ https://www.kancloud.cn/thinkcmf/theme_tutorial
 2. 导入`app/portal/data/portal.sql`文件（注意把`cmf_`表前缀替换成自己的）
 3. 在后台模板管理里安装`simpleboot3`模板
 4. 如果想用`simpleboot3`模板，可以启用此模板
-5. 导入后台菜单
+5. 导入后台菜单  
+
 详细安装步骤请查看[ThinkCMF FAQ](https://www.kancloud.cn/thinkcmf/faq/1005840)
 
 
