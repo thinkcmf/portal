@@ -218,6 +218,11 @@ class PostService
     {
         $portalPostModel = new PortalPostModel();
 
+        $wherePublishedTime = function (Query $query) {
+            $query->where('post.published_time', '>', 0)
+                ->where('post.published_time', '<', time());
+        };
+
         if (empty($categoryId)) {
 
             $where = [
@@ -229,15 +234,12 @@ class PostService
             $article = $portalPostModel->alias('post')->field('post.*')
                 ->where($where)
                 ->where('post.id', '>', $postId)
-                ->where('post.published_time', ['< time', time()], ['> time', 0], 'and')
+                ->where($wherePublishedTime)
                 ->order('id', 'ASC')
                 ->find();
         } else {
 
-            $wherePublishedTime = function (Query $query) {
-                $query->where('post.published_time', '>', 0)
-                    ->where('post.published_time', '<', time());
-            };
+
 
             $where = [
                 'post.post_type'       => 1,
