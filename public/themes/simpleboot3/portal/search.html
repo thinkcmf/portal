@@ -17,7 +17,7 @@
 			</div>
 			<php>
 				$where=function($query)use($keyword){
-				$query->where('post.create_time','egt',0)->where('post.post_title','like',"%$keyword%");
+				$query->where('post.create_time','>=',0)->where('post.post_title','like',"%$keyword%");
 				};
 			</php>
 
@@ -48,7 +48,7 @@
 			</div>
 
 		</div>
-		
+
 	</div>
 
 	<include file="public@footer"/>

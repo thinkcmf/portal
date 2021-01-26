@@ -17,7 +17,7 @@
             <div class="">
                 <php>
                     $where= function($query){
-                    $query->where('post.create_time','egt',0);
+                    $query->where('post.create_time','>',0);
                     };
                     $page=[
                         'list_rows'=>1,
