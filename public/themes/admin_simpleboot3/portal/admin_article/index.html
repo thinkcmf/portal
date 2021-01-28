@@ -69,9 +69,6 @@
                         <input type="checkbox" class="js-check-all" data-direction="x" data-checklist="js-check-x">
                     </label>
                 </th>
-                <notempty name="category">
-                    <th width="50">{:lang('SORT')}</th>
-                </notempty>
                 <th width="50">ID</th>
                 <th>标题</th>
                 <th>分类</th>
@@ -91,19 +88,13 @@
                         <input type="checkbox" class="js-check" data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
                                value="{$vo.id}" title="ID:{$vo.id}">
                     </td>
-                    <notempty name="category">
-                        <td>
-                            <input name="list_orders[{$vo.post_category_id}]" class="input-order" type="text"
-                                   value="{$vo.list_order}">
-                        </td>
-                    </notempty>
                     <td><b>{$vo.id}</b></td>
                     <td>
-                        <notempty name="category">
-                            <a href="{:cmf_url('portal/Article/index',array('id'=>$vo['id'],'cid'=>$vo['category_id']))}"
+                        <notempty name="vo.categories">
+                            <a href="{:cmf_url('portal/Article/index',array('id'=>$vo['id'],'cid'=>$vo['categories'][0]['id']))}"
                                target="_blank">{$vo.post_title}</a>
                             <else/>
-                            <a href="{:cmf_url('portal/Article/index',array('id'=>$vo['id']))}"
+                            <a href="{:cmf_url('portal/Article/index',array('id'=>$vo.id))}"
                                target="_blank">{$vo.post_title}</a>
                         </notempty>
                     </td>
