@@ -180,9 +180,9 @@ class ApiService
         $portalPostModel = new PortalPostModel();
 
         $where = [
-            'post.post_status' => 1,
-            'post.post_type'   => 1,
-            'post.delete_time' => 0
+            ['post.post_status' ,'=', 1],
+            ['post.post_type'   ,'=', 1],
+            ['post.delete_time' ,'=', 0]
         ];
 
         $paramWhere = empty($param['where']) ? '' : $param['where'];
@@ -193,18 +193,14 @@ class ApiService
         $relation = empty($param['relation']) ? '' : $param['relation'];
         $tagId    = empty($param['tag_id']) ? '' : $param['tag_id'];
 
-        $join = [
-            //['__USER__ user', 'post.user_id = user.id'],
-        ];
-
+        $articles = $portalPostModel->alias('post');
         if (empty($tagId)) {
             return null;
 
         } else {
             $field = !empty($param['field']) ? $param['field'] : 'post.*';
-            array_push($join, ['__PORTAL_TAG_POST__ tag_post', 'post.id = tag_post.post_id']);
-
-            $where['tag_post.tag_id'] = $tagId;
+            $articles =  $articles->join('portal_tag_post tag_post', 'post.id = tag_post.post_id');
+            $where[] = ['tag_post.tag_id','=',$tagId];
         }
 
         $wherePublishedTime = function (Query $query) {
@@ -212,9 +208,7 @@ class ApiService
                 ->where('post.published_time', '<', time());
         };
 
-
-        $articles = $portalPostModel->alias('post')->field($field)
-            ->join($join)
+        $articles = $articles->field($field)
             ->where($where)
             ->where($paramWhere)
             ->where($wherePublishedTime)
