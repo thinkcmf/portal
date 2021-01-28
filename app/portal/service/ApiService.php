@@ -180,9 +180,9 @@ class ApiService
         $portalPostModel = new PortalPostModel();
 
         $where = [
-            ['post.post_status' ,'=', 1],
-            ['post.post_type'   ,'=', 1],
-            ['post.delete_time' ,'=', 0]
+            'post.post_status' => 1,
+            'post.post_type'   => 1,
+            'post.delete_time' => 0
         ];
 
         $paramWhere = empty($param['where']) ? '' : $param['where'];
