@@ -13,6 +13,11 @@ use think\Model;
 
 class PortalTagModel extends Model
 {
+    /**
+     * 模型名称
+     * @var string
+     */
+    protected $name = 'portal_tag';
 
     /**
      * 关联 文章表

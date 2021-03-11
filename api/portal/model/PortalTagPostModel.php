@@ -14,6 +14,12 @@ use think\Model;
 class PortalTagPostModel extends Model
 {
     /**
+     * 模型名称
+     * @var string
+     */
+    protected $name = 'portal_tag_post';
+
+    /**
      * 获取指定id相关的文章id数组
      * @param $post_id  文章id
      * @return array    相关的文章id

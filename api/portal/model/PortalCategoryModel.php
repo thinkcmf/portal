@@ -13,6 +13,12 @@ use think\Model;
 
 class PortalCategoryModel extends Model
 {
+    /**
+     * 模型名称
+     * @var string
+     */
+    protected $name = 'portal_category';
+
     //类型转换
     protected $type = [
         'more' => 'array',

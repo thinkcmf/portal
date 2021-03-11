@@ -14,6 +14,11 @@ use think\Model;
 
 class UserModel extends Model
 {
+    /**
+     * 模型名称
+     * @var string
+     */
+    protected $name = 'user';
 
     //模型关联方法
     protected $relationFilter = ['user'];

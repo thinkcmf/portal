@@ -14,6 +14,13 @@ use think\Model;
 
 class PortalCategoryPostModel extends Model
 {
+
+    /**
+     * 模型名称
+     * @var string
+     */
+    protected $name = 'portal_category_post';
+
     /**
      * 基础查询
      */

@@ -18,6 +18,12 @@ use think\Model;
  */
 class PortalPostModel extends Model
 {
+    /**
+     * 模型名称
+     * @var string
+     */
+    protected $name = 'portal_post';
+
     //设置只读字段
     protected $readonly = ['user_id'];
     // 开启自动写入时间戳字段
