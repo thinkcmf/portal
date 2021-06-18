@@ -89,7 +89,7 @@ class AdminTagController extends AdminBaseController
         $arrData = $this->request->param();
 
         $portalTagModel = new PortalTagModel();
-        $portalTagModel->isUpdate(false)->allowField(true)->save($arrData);
+        $portalTagModel->save($arrData);
 
         $this->success(lang("SAVE_SUCCESS"));
 
@@ -118,7 +118,7 @@ class AdminTagController extends AdminBaseController
         }
 
         $portalTagModel = new PortalTagModel();
-        $portalTagModel->where("id", $intId)->update(["status" => $intStatus]);
+        $portalTagModel->where("id",'=', $intId)->update(["status" => $intStatus]);
 
         $this->success(lang("SAVE_SUCCESS"));
 
@@ -145,8 +145,8 @@ class AdminTagController extends AdminBaseController
             $this->error(lang("NO_ID"));
         }
 
-        PortalTagModel::where('id', $intId)->delete();
-        PortalTagPostModel::where('tag_id', $intId)->delete();
+        PortalTagModel::where('id','=', $intId)->delete();
+        PortalTagPostModel::where('tag_id','=', $intId)->delete();
         $this->success(lang("DELETE_SUCCESS"));
     }
 }
